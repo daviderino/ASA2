@@ -35,6 +35,10 @@ public:
 		r->reverse = this;
 	}
 
+	Edge* getReverse() {
+		return reverse;
+	}
+
 	bool increaseFlow() {
 		if(flow < capacity) {
 			flow++;
@@ -108,20 +112,21 @@ public:
 };
 
 bool DFS(Vertex *v) {
-	if(v->getType() == SINK){		
+	if(v->getType() == SINK){	
+		v->setVisited(true);	
 		return true;
 	}
 
 	for(Edge *e: v->getAdjacencies()) {
-		if(!e->getToVertex()->getVisited() && e->getFlow() < e->getCapacity()) {
+		if(!e->getToVertex()->getVisited() && e->getFlow() < e->getCapacity() && (e->getFromVertex()->getType() == SOURCE || e->getToVertex()->getType() != ADDRESS)) {
+			e->getFromVertex()->setVisited(true);
 			if(DFS(e->getToVertex())){
-				if(e->increaseFlow()) {
+				if(e->increaseFlow() && e->getReverse() && e->getReverse()->decreaseFlow()) {
 					return true;
 				}
 				else {
-					// error
+					// weird error
 				}
-
 			}
 		}
 	}
@@ -141,8 +146,8 @@ int main() {
 	getline(std::cin, inputS, ' ');
 	getline(std::cin, inputC);
 
-	const int cols = std::stoi(inputM);	// number of avenues
-	const int rows = std::stoi(inputN);	// number of streets
+	const int rows = std::stoi(inputM);	// number of avenues
+	const int cols = std::stoi(inputN);	// number of streets
 	const int S = std::stoi(inputS);	// number of supermarkets
 	const int C = std::stoi(inputC);	// number of citizens;
 
@@ -217,7 +222,6 @@ int main() {
 		Edge* e1 = new Edge(currentOut, sink);
 		
 		currentOut->addEdge(e1);
-		currentOut->setType(SUPERMARKET);
 
 		Edge* e2 = new Edge(sink, currentIn);
 		e2->setReverse(e1);
@@ -246,26 +250,27 @@ int main() {
 		e2->setReverse(e1);
 
 		currentOut->addEdge(e2);
-		currentOut->setType(ADDRESS);
 		
 		addresses.push_back(currentIn); // might not be needed
 	}
 
-	for(int i = 0; i < rows; i++) {
-		for(int j = 0; j < cols; j++) {
-			verticesIn[rows * i + j].setVisited(false);
-			verticesOut[rows * i + j].setVisited(false);
-		}
-	}
-
-	source -> setVisited(false);
-	sink -> setVisited(false);
-
 	int result = 0;
+
 	while(DFS(source)) {
 		result++;
+
+		for(int i = 0; i < rows; i++) {
+			for(int j = 0; j < cols; j++) {
+				verticesIn[rows * i + j].setVisited(false);
+				verticesOut[rows * i + j].setVisited(false);
+			}
+		}
+
+		source -> setVisited(false);
+		sink -> setVisited(false);
 	}
-	
-	
+
+	std::cout << result << std::endl;
+		
     return 0;
 }

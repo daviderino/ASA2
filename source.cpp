@@ -112,23 +112,19 @@ public:
 };
 
 bool DFS(Vertex *v) {
-	if(v->getType() == SUPERMARKET){	
-		v->setVisited(true);
-		v->getAdjacencies()[0]->getReverse()->decreaseFlow();
-		v->getAdjacencies()[0]->increaseFlow();
+
+	v->setVisited(true);
+
+	if(v->getType() == SINK){	
 		return true;
 	}
 
 	for(Edge *e: v->getAdjacencies()) {
 		if(!e->getToVertex()->getVisited() && e->getFlow() < e->getCapacity() && (e->getFromVertex()->getType() == SOURCE || e->getToVertex()->getType() != ADDRESS)) {
-			e->getFromVertex()->setVisited(true);
 			if(DFS(e->getToVertex())){
-				if(e->increaseFlow() && e->getReverse() && e->getReverse()->decreaseFlow()) {
-					return true;
-				}
-				else {
-					// weird error
-				}
+				e->increaseFlow();
+				e->getReverse()->decreaseFlow();
+				return true;
 			}
 		}
 	}
@@ -167,6 +163,8 @@ int main() {
 
 	Vertex verticesIn[rows * cols];
 	Vertex verticesOut[rows * cols];
+	
+	
 
 	Vertex* sink = new Vertex();
 	sink->setType(SINK);
@@ -238,7 +236,7 @@ int main() {
 		e2->setReverse(e1);
 
 		sink->addEdge(e2);
-		currentIn->setType(SUPERMARKET);
+		currentOut->setType(SUPERMARKET);
 
 		supermarkets.push_back(currentIn); // MIGHT NOT BE NEEDED
 	}

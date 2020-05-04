@@ -10,6 +10,7 @@ class Vertex;
 class Edge {
 private:
 	const int capacity = 1;
+	const int minFlow = -1;
 	int flow = 0;
 	Vertex* v;						// destination vertex
 public:
@@ -22,10 +23,20 @@ public:
 	}
 
 	bool increaseFlow() {
-		if(flow < capacity && v->getFlow() < v->getCapacity()) {
+		if(flow < capacity) {
 			flow++;
 
-			return v->increaseFlow();
+			return true;
+		}
+
+		return false;
+	}
+
+	bool decreaseFlow() {
+		if(flow >= minFlow) {
+			flow--;
+
+			return true;
 		}
 
 		return false;
@@ -126,6 +137,7 @@ int main() {
 		getline(std::cin, a, ' ');
 		getline(std::cin, b);
 
+		Vertex* v = &vertices[std::stoi(a)][std::stoi(b)];
 		v->setType(ADDRESS);
 		addresses.push_back(&vertices[std::stoi(a)][std::stoi(b)]);
 	}

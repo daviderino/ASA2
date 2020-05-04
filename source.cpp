@@ -2,9 +2,11 @@
 #include <vector>
 #include <list>
 
+#define SOURCE -1
 #define NOTHING 0
 #define SUPERMARKET 1
 #define ADDRESS 2
+#define SINK 3
 
 using namespace std;
 
@@ -15,14 +17,22 @@ private:
 	const int capacity = 1;
 	const int minFlow = -1;
 	int flow = 0;
-	Vertex* v;						// destination vertex
+	Edge* reverse = nullptr;
+	Vertex* from;
+	Vertex* to;
 public:
-	Edge(Vertex *v) {
-		this->v = v;
+	Edge(Vertex *from, Vertex *to) {
+		this->from = from;
+		this->to = to;	
 	}
 
 	const int getFlow() {
 		return flow;
+	}
+
+	void setReverse(Edge *r) {
+		this->reverse = r;
+		r->reverse = this;
 	}
 
 	bool increaseFlow() {
@@ -45,8 +55,12 @@ public:
 		return false;
 	}
 
-	Vertex* getVertex() {
-		return v;
+	Vertex* getToVertex() {
+		return to;
+	}
+
+	Vertex* getFromVertex() {
+		return from;
 	}
 
 	const int getCapacity() {
@@ -56,14 +70,20 @@ public:
 
 class Vertex {
 private:
+	int id = 1337;
 	int type = NOTHING;				// 0 - nothing on vertex, 1 supermarket, 2 address
 	bool visited = false;
 
 	std::vector<Edge*> edges;
 public:
-	// adds edge from this vertex to v
-	void addEdge(Vertex *v) {
-		edges.push_back(new Edge(v));
+	void setId(int i) {
+		id = i;
+	}
+
+	void addEdge(Edge *e) {
+		if(e->getFromVertex() == this) {
+			edges.push_back(e);
+		}
 	}
 
 	const int getType() {
@@ -87,18 +107,21 @@ public:
 	}
 };
 
-bool DFS(Vertex *v, list<Vertex*> path) {
-
-	if(v->getType() == SUPERMARKET){
-		path.push_front(v);
+bool DFS(Vertex *v) {
+	if(v->getType() == SINK){		
 		return true;
 	}
 
 	for(Edge *e: v->getAdjacencies()) {
-		if(!e->getVertex()->getVisited() && e->getFlow() < e->getCapacity()) {
-			if(DFS(e->getVertex(), path)){
-				path.push_front(v);
-				return true;
+		if(!e->getToVertex()->getVisited() && e->getFlow() < e->getCapacity()) {
+			if(DFS(e->getToVertex())){
+				if(e->increaseFlow()) {
+					return true;
+				}
+				else {
+					// error
+				}
+
 			}
 		}
 	}
@@ -124,31 +147,61 @@ int main() {
 	const int C = std::stoi(inputC);	// number of citizens;
 
 	Vertex* source = new Vertex();
+	source->setType(SOURCE);
 
 	Vertex verticesIn[rows * cols];
 	Vertex verticesOut[rows * cols];
 
 	Vertex* sink = new Vertex();
+	sink->setType(SINK);
 
 	std::vector<Vertex*> supermarkets;
 	std::vector<Vertex*> addresses;
 
 	for(int i = 0; i < rows; i++) {
 		for(int j = 0; j < cols; j++) {
-			verticesIn[rows * i + j].addEdge(&verticesOut[rows * i + j]);
-			
-			if(i > 0) {
-				verticesOut[rows * i + j].addEdge(&verticesIn[rows * (i-1) + j])
-			}
-			if(i < (rows - 1)) {
-				verticesOut[rows * i + j].addEdge(&verticesIn[rows * (i+1) + j])
-			}
-			if(j > 0) {
-				verticesOut[rows * i + j].addEdge(&verticesIn[rows * i + (j-1)])
-			}
+			Vertex* currentIn = &verticesIn[rows * i + j];
+			Vertex* currentOut = &verticesOut[rows * i + j];
+
+			Edge* e1 = new Edge(currentIn, currentOut);
+			Edge* e2 = new Edge(currentOut, currentIn);
+
+			currentIn->addEdge(e1);
+			e2->setReverse(e1);
+			currentOut->addEdge(e2);
+
+			currentIn->setId(rows * i + j);
+			currentOut->setId(-1 * (rows * i + j));
+
+			// right vertex
 			if(j < (cols - 1)) {
-				verticesOut[rows * i + j].addEdge(&verticesIn[rows * i + (j+1)])
+				Edge* e = new Edge(currentOut, &verticesIn[rows * i + (j+1)]);
+
+				currentOut->addEdge(e);
 			}
+
+			// bottom vertex
+			if(i < (rows - 1)) {
+				Edge* e = new Edge(currentOut, &verticesIn[rows * (i+1) + j]);
+				currentOut->addEdge(e);
+			}
+			
+			// left vertex 
+			if(j > 0) {
+				Edge* e = new Edge(currentOut, &verticesIn[rows * i + (j-1)]);
+				e->setReverse(verticesOut[rows * i + (j - 1)].getAdjacencies()[1]);
+				
+				currentOut->addEdge(e);
+			}
+
+			// top vertex
+			if(i > 0) {
+				Edge* e = new Edge(currentOut, &verticesIn[rows * (i-1) + j]);
+				e->setReverse(verticesOut[rows * (i-1) + j].getAdjacencies()[2]);
+
+				currentOut->addEdge(e);
+			}
+
 		}
 	}
 
@@ -158,12 +211,21 @@ int main() {
 		getline(std::cin, a, ' ');
 		getline(std::cin, b);
 
-		Vertex* v = &verticesOut[rows * std::stoi(a) + std::stoi(b)];
-		v->addEdge(sink);
-		v->setType(SUPERMARKET);
-		verticesIn[rows * std::stoi(a) + std::stoi(b)].setType(SUPERMARKET);
+		Vertex* currentIn = &verticesIn[rows * (std::stoi(a) - 1) + (std::stoi(b) - 1)];
+		Vertex* currentOut = &verticesOut[rows * (std::stoi(a) - 1) + (std::stoi(b) - 1)];
 
-		supermarkets.push_back(v);
+		Edge* e1 = new Edge(currentOut, sink);
+		
+		currentOut->addEdge(e1);
+		currentOut->setType(SUPERMARKET);
+
+		Edge* e2 = new Edge(sink, currentIn);
+		e2->setReverse(e1);
+
+		sink->addEdge(e2);
+		currentIn->setType(SUPERMARKET);
+
+		supermarkets.push_back(currentIn); // MIGHT NOT BE NEEDED
 	}
 
 	// address
@@ -172,15 +234,22 @@ int main() {
 		getline(std::cin, a, ' ');
 		getline(std::cin, b);
 
-		Vertex* v = &verticesIn[rows * std::stoi(a) + std::stoi(b)];
+		Vertex* currentIn = &verticesIn[rows * (std::stoi(a) - 1) + (std::stoi(b) - 1)];
+		Vertex* currentOut =  &verticesOut[rows * (std::stoi(a) - 1) + (std::stoi(b) - 1)];
 
-		source->addEdge(v);
-		v->setType(ADDRESS);
-		verticesOut[rows * std::stoi(a) + std::stoi(b)].setType(ADDRESS);
+		Edge* e1 = new Edge(source, currentIn);
+
+		source->addEdge(e1);
+		currentIn->setType(ADDRESS);
+
+		Edge* e2 = new Edge(currentOut, source);
+		e2->setReverse(e1);
+
+		currentOut->addEdge(e2);
+		currentOut->setType(ADDRESS);
 		
-		addresses.push_back(v);
+		addresses.push_back(currentIn); // might not be needed
 	}
-
 
 	for(int i = 0; i < rows; i++) {
 		for(int j = 0; j < cols; j++) {
@@ -191,22 +260,12 @@ int main() {
 
 	source -> setVisited(false);
 	sink -> setVisited(false);
-	
-	list<Vertex*> path;
-	while(DFS(source, path)){
-		
-		Vertex* before;
-		for(Vertex* v: path){
-			for(Edge* edge: before->getAdjacencies()){
-				if(edge->getVertex() == v){
-					edge.
-				}
-			}
-		}
 
-		path = new list<Vertex>;
+	int result = 0;
+	while(DFS(source)) {
+		result++;
 	}
-
+	
 	
     return 0;
 }

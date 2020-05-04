@@ -1,24 +1,28 @@
 #include <iostream>
 #include <vector>
 
+#define NOTHING 0
+#define SUPERMARKET 1
+#define ADDRESS 2
+
 class Vertex;
 
 class Edge {
 private:
 	const int capacity = 1;
 	int flow = 0;
-	Vertex* v;
+	Vertex* v;						// destination vertex
 public:
 	Edge(Vertex *v) {
 		this->v = v;
 	}
 
-	int getFlow() {
+	const int getFlow() {
 		return flow;
 	}
 
 	bool increaseFlow() {
-		if(flow == 0 && v->getFlow() == 0) {
+		if(flow < capacity && v->getFlow() < v->getCapacity()) {
 			flow++;
 
 			return v->increaseFlow();
@@ -31,15 +35,15 @@ public:
 class Vertex {
 private:
 	const int capacity = 1;
-	int flow = 0;
-	int type = 0;
 	std::vector<Edge*> edges;
+	int flow = 0;
+	int type = NOTHING;				// 0 - nothing on vertex, 1 supermarket, 2 address
 public:
 	void addEdge(Vertex *v) {
 		edges.push_back(new Edge(v));
 	}
 
-	int getType() {
+	const int getType() {
 		return type;
 	}
 
@@ -47,12 +51,16 @@ public:
 		type = t;
 	}
 
-	int getFlow() {
+	const int getFlow() {
 		return flow;
 	}
 
+	const int getCapacity() {
+		return capacity;
+	}
+
 	bool increaseFlow() {
-		if(flow == 0) {
+		if(flow < capacity) {
 			flow++;
 
 			return true;
@@ -106,8 +114,8 @@ int main() {
 		getline(std::cin, a, ' ');
 		getline(std::cin, b);
 
-		Vertex* v = &vertices[std::stoi(a)][std::stoi(b)]
-		v->setType(1);
+		Vertex* v = &vertices[std::stoi(a)][std::stoi(b)];
+		v->setType(SUPERMARKET);
 
 		supermarkets.push_back(&vertices[std::stoi(a)][std::stoi(b)]);
 	}
@@ -118,11 +126,9 @@ int main() {
 		getline(std::cin, a, ' ');
 		getline(std::cin, b);
 
-		v->setType(2);
+		v->setType(ADDRESS);
 		addresses.push_back(&vertices[std::stoi(a)][std::stoi(b)]);
 	}
-
-	std::cout<<"hello world";
 
     return 0;
 }

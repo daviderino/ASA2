@@ -112,8 +112,10 @@ public:
 };
 
 bool DFS(Vertex *v) {
-	if(v->getType() == SINK){	
+	if(v->getType() == SUPERMARKET){	
 		v->setVisited(true);
+		v->getAdjacencies()[0]->getReverse()->decreaseFlow();
+		v->getAdjacencies()[0]->increaseFlow();
 		return true;
 	}
 

@@ -41,15 +41,20 @@ public:
 
 		return false;
 	}
+
+	Vertex* getVertex() {
+		return v;
+	}
 };
 
 class Vertex {
 private:
-	const int capacity = 1;
-	std::vector<Edge*> edges;
-	int flow = 0;
 	int type = NOTHING;				// 0 - nothing on vertex, 1 supermarket, 2 address
+	bool visited = false;
+
+	std::vector<Edge*> edges;
 public:
+	// adds edge from this vertex to v
 	void addEdge(Vertex *v) {
 		edges.push_back(new Edge(v));
 	}
@@ -62,12 +67,24 @@ public:
 		type = t;
 	}
 
+	void setVisited(bool visited) {
+		this->visited = visited;
+	}
+
+	const bool getVisited() {
+		return visited;
+	}
+
 	const int getFlow() {
 		return flow;
 	}
 
 	const int getCapacity() {
 		return capacity;
+	}
+
+	std::vector<Edge*> getAdjacencies() {
+		return edges;
 	}
 
 	bool increaseFlow() {
@@ -80,6 +97,14 @@ public:
 		return false;
 	}
 };
+
+void DFS(Vertex *v) {
+	v->setVisited(true);
+
+	for(Edge *e: v->getAdjacencies()) {
+		
+	}
+}
 
 
 int main() {
@@ -98,23 +123,31 @@ int main() {
 	const int S = std::stoi(inputS);	// number of supermarkets
 	const int C = std::stoi(inputC);	// number of citizens;
 
-	Vertex vertices[rows][cols];
+	Vertex* source = new Vertex();
+
+	Vertex verticesIn[rows * cols];
+	Vertex verticesOut[rows * cols];
+
+	Vertex* sink = new Vertex();
+
 	std::vector<Vertex*> supermarkets;
 	std::vector<Vertex*> addresses;
 
 	for(int i = 0; i < rows; i++) {
 		for(int j = 0; j < cols; j++) {
+			verticesIn[rows * i + j].addEdge(&verticesOut[rows * i + j]);
+			
 			if(i > 0) {
-				vertices[i][j].addEdge(&vertices[i-1][j]);
+				verticesOut[rows * i + j].addEdge(&verticesIn[rows * (i-1) + j])
 			}
 			if(i < (rows - 1)) {
-				vertices[i][j].addEdge(&vertices[i+1][j]);
+				verticesOut[rows * i + j].addEdge(&verticesIn[rows * (i+1) + j])
 			}
 			if(j > 0) {
-				vertices[i][j].addEdge(&vertices[i][j-1]);
+				verticesOut[rows * i + j].addEdge(&verticesIn[rows * i + (j-1)])
 			}
 			if(j < (cols - 1)) {
-				vertices[i][j].addEdge(&vertices[i][j+1]);
+				verticesOut[rows * i + j].addEdge(&verticesIn[rows * i + (j+1)])
 			}
 		}
 	}
@@ -125,22 +158,31 @@ int main() {
 		getline(std::cin, a, ' ');
 		getline(std::cin, b);
 
-		Vertex* v = &vertices[std::stoi(a)][std::stoi(b)];
+		Vertex* v = &verticesOut[rows * std::stoi(a) + std::stoi(b)];
+		v->addEdge(sink);
 		v->setType(SUPERMARKET);
+		verticesIn[rows * std::stoi(a) + std::stoi(b)].setType(SUPERMARKET);
 
-		supermarkets.push_back(&vertices[std::stoi(a)][std::stoi(b)]);
+		supermarkets.push_back(v);
 	}
 
-
+	// address
 	for(int i = 0; i < C; i++) {
 		std::string a, b;
 		getline(std::cin, a, ' ');
 		getline(std::cin, b);
 
-		Vertex* v = &vertices[std::stoi(a)][std::stoi(b)];
+		Vertex* v = &verticesIn[rows * std::stoi(a) + std::stoi(b)];
+
+		source->addEdge(v);
 		v->setType(ADDRESS);
-		addresses.push_back(&vertices[std::stoi(a)][std::stoi(b)]);
+		verticesOut[rows * std::stoi(a) + std::stoi(b)].setType(ADDRESS);
+		
+		addresses.push_back(v);
 	}
 
+	// Ford-Fulkerson
+
+	
     return 0;
 }

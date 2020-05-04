@@ -81,5 +81,7 @@ int main() {
 		addresses.push_back(&vertices[std::stoi(a)][std::stoi(b)]);
 	}
 
+	std::cout<<"hello world";
+
     return 0;
 }

@@ -1,9 +1,12 @@
 #include <iostream>
 #include <vector>
+#include <list>
 
 #define NOTHING 0
 #define SUPERMARKET 1
 #define ADDRESS 2
+
+using namespace std;
 
 class Vertex;
 
@@ -45,6 +48,10 @@ public:
 	Vertex* getVertex() {
 		return v;
 	}
+
+	const int getCapacity() {
+		return capacity;
+	}
 };
 
 class Vertex {
@@ -75,35 +82,28 @@ public:
 		return visited;
 	}
 
-	const int getFlow() {
-		return flow;
-	}
-
-	const int getCapacity() {
-		return capacity;
-	}
-
 	std::vector<Edge*> getAdjacencies() {
 		return edges;
 	}
-
-	bool increaseFlow() {
-		if(flow < capacity) {
-			flow++;
-
-			return true;
-		}
-
-		return false;
-	}
 };
 
-void DFS(Vertex *v) {
-	v->setVisited(true);
+bool DFS(Vertex *v, list<Vertex*> path) {
+
+	if(v->getType() == SUPERMARKET){
+		path.push_front(v);
+		return true;
+	}
 
 	for(Edge *e: v->getAdjacencies()) {
-		
+		if(!e->getVertex()->getVisited() && e->getFlow() < e->getCapacity()) {
+			if(DFS(e->getVertex(), path)){
+				path.push_front(v);
+				return true;
+			}
+		}
 	}
+
+	return false;
 }
 
 
@@ -181,7 +181,31 @@ int main() {
 		addresses.push_back(v);
 	}
 
-	// Ford-Fulkerson
+
+	for(int i = 0; i < rows; i++) {
+		for(int j = 0; j < cols; j++) {
+			verticesIn[rows * i + j].setVisited(false);
+			verticesOut[rows * i + j].setVisited(false);
+		}
+	}
+
+	source -> setVisited(false);
+	sink -> setVisited(false);
+	
+	list<Vertex*> path;
+	while(DFS(source, path)){
+		
+		Vertex* before;
+		for(Vertex* v: path){
+			for(Edge* edge: before->getAdjacencies()){
+				if(edge->getVertex() == v){
+					edge.
+				}
+			}
+		}
+
+		path = new list<Vertex>;
+	}
 
 	
     return 0;

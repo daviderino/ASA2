@@ -113,7 +113,7 @@ public:
 
 bool DFS(Vertex *v) {
 	if(v->getType() == SINK){	
-		v->setVisited(true);	
+		v->setVisited(true);
 		return true;
 	}
 
@@ -151,6 +151,15 @@ int main() {
 	const int S = std::stoi(inputS);	// number of supermarkets
 	const int C = std::stoi(inputC);	// number of citizens;
 
+	int index;
+
+	if(rows > cols) {
+		index = rows;
+	}
+	else {
+		index = cols;
+	}
+
 	Vertex* source = new Vertex();
 	source->setType(SOURCE);
 
@@ -165,8 +174,8 @@ int main() {
 
 	for(int i = 0; i < rows; i++) {
 		for(int j = 0; j < cols; j++) {
-			Vertex* currentIn = &verticesIn[rows * i + j];
-			Vertex* currentOut = &verticesOut[rows * i + j];
+			Vertex* currentIn = &verticesIn[index * i + j];
+			Vertex* currentOut = &verticesOut[index * i + j];
 
 			Edge* e1 = new Edge(currentIn, currentOut);
 			Edge* e2 = new Edge(currentOut, currentIn);
@@ -175,34 +184,34 @@ int main() {
 			e2->setReverse(e1);
 			currentOut->addEdge(e2);
 
-			currentIn->setId(rows * i + j);
-			currentOut->setId(-1 * (rows * i + j));
+			currentIn->setId(index * i + j);
+			currentOut->setId(-1 * (index * i + j));
 
 			// right vertex
 			if(j < (cols - 1)) {
-				Edge* e = new Edge(currentOut, &verticesIn[rows * i + (j+1)]);
+				Edge* e = new Edge(currentOut, &verticesIn[index * i + (j+1)]);
 
 				currentOut->addEdge(e);
 			}
 
 			// bottom vertex
 			if(i < (rows - 1)) {
-				Edge* e = new Edge(currentOut, &verticesIn[rows * (i+1) + j]);
+				Edge* e = new Edge(currentOut, &verticesIn[index * (i+1) + j]);
 				currentOut->addEdge(e);
 			}
 			
 			// left vertex 
 			if(j > 0) {
-				Edge* e = new Edge(currentOut, &verticesIn[rows * i + (j-1)]);
-				e->setReverse(verticesOut[rows * i + (j - 1)].getAdjacencies()[1]);
+				Edge* e = new Edge(currentOut, &verticesIn[index * i + (j-1)]);
+				e->setReverse(verticesOut[index * i + (j - 1)].getAdjacencies()[1]);
 				
 				currentOut->addEdge(e);
 			}
 
 			// top vertex
 			if(i > 0) {
-				Edge* e = new Edge(currentOut, &verticesIn[rows * (i-1) + j]);
-				e->setReverse(verticesOut[rows * (i-1) + j].getAdjacencies()[2]);
+				Edge* e = new Edge(currentOut, &verticesIn[index * (i-1) + j]);
+				e->setReverse(verticesOut[index * (i-1) + j].getAdjacencies()[2]);
 
 				currentOut->addEdge(e);
 			}
@@ -216,8 +225,8 @@ int main() {
 		getline(std::cin, a, ' ');
 		getline(std::cin, b);
 
-		Vertex* currentIn = &verticesIn[rows * (std::stoi(a) - 1) + (std::stoi(b) - 1)];
-		Vertex* currentOut = &verticesOut[rows * (std::stoi(a) - 1) + (std::stoi(b) - 1)];
+		Vertex* currentIn = &verticesIn[index * (std::stoi(a) - 1) + (std::stoi(b) - 1)];
+		Vertex* currentOut = &verticesOut[index * (std::stoi(a) - 1) + (std::stoi(b) - 1)];
 
 		Edge* e1 = new Edge(currentOut, sink);
 		
@@ -238,8 +247,8 @@ int main() {
 		getline(std::cin, a, ' ');
 		getline(std::cin, b);
 
-		Vertex* currentIn = &verticesIn[rows * (std::stoi(a) - 1) + (std::stoi(b) - 1)];
-		Vertex* currentOut =  &verticesOut[rows * (std::stoi(a) - 1) + (std::stoi(b) - 1)];
+		Vertex* currentIn = &verticesIn[index * (std::stoi(a) - 1) + (std::stoi(b) - 1)];
+		Vertex* currentOut =  &verticesOut[index * (std::stoi(a) - 1) + (std::stoi(b) - 1)];
 
 		Edge* e1 = new Edge(source, currentIn);
 
@@ -261,8 +270,8 @@ int main() {
 
 		for(int i = 0; i < rows; i++) {
 			for(int j = 0; j < cols; j++) {
-				verticesIn[rows * i + j].setVisited(false);
-				verticesOut[rows * i + j].setVisited(false);
+				verticesIn[index * i + j].setVisited(false);
+				verticesOut[index * i + j].setVisited(false);
 			}
 		}
 

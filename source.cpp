@@ -112,21 +112,26 @@ public:
 };
 
 bool DFS(Vertex *v) {
-
-	v->setVisited(true);
+  	v->setVisited(true);
 
 	if(v->getType() == SINK){	
 		return true;
 	}
 
+	v->setVisited(true);
+
 	for(Edge *e: v->getAdjacencies()) {
-		if(!e->getToVertex()->getVisited() && e->getFlow() < e->getCapacity() && (e->getFromVertex()->getType() == SOURCE || e->getToVertex()->getType() != ADDRESS)) {
-			if(DFS(e->getToVertex())){
-				e->increaseFlow();
-				e->getReverse()->decreaseFlow();
-				return true;
+		if(!e->getToVertex()->getVisited()) {
+			if(e->getFlow() < e->getCapacity() && (e->getFromVertex()->getType() == SOURCE || e->getToVertex()->getType() != ADDRESS)) {
+				if(DFS(e->getToVertex())){
+					e->increaseFlow();
+					e->getReverse()->decreaseFlow();
+
+					return true;
+				}
 			}
 		}
+
 	}
 
 	return false;

@@ -112,25 +112,25 @@ public:
 };
 
 bool DFS(Vertex *v) {
-	if(v->getType() == SUPERMARKET){	
+	if(v->getType() == SINK){	
 		v->setVisited(true);
-		v->getAdjacencies()[0]->getReverse()->decreaseFlow();
-		v->getAdjacencies()[0]->increaseFlow();
 		return true;
 	}
 
+	v->setVisited(true);
+
 	for(Edge *e: v->getAdjacencies()) {
-		if(!e->getToVertex()->getVisited() && e->getFlow() < e->getCapacity() && (e->getFromVertex()->getType() == SOURCE || e->getToVertex()->getType() != ADDRESS)) {
-			e->getFromVertex()->setVisited(true);
-			if(DFS(e->getToVertex())){
-				if(e->increaseFlow() && e->getReverse() && e->getReverse()->decreaseFlow()) {
+		if(!e->getToVertex()->getVisited()) {
+			if(e->getFlow() < e->getCapacity() && (e->getFromVertex()->getType() == SOURCE || e->getToVertex()->getType() != ADDRESS)) {
+				if(DFS(e->getToVertex())){
+					e->increaseFlow();
+					e->getReverse()->decreaseFlow();
+
 					return true;
-				}
-				else {
-					// weird error
 				}
 			}
 		}
+
 	}
 
 	return false;

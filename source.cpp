@@ -186,6 +186,7 @@ int main() {
 			Edge* e2 = new Edge(currentOut, currentIn);
 
 			currentIn->addEdge(e1);
+			e2->increaseFlow();
 			e2->setReverse(e1);
 			currentOut->addEdge(e2);
 
@@ -194,31 +195,46 @@ int main() {
 
 			// right vertex
 			if(j < (cols - 1)) {
-				Edge* e = new Edge(currentOut, &verticesIn[index * i + (j+1)]);
-
-				currentOut->addEdge(e);
+				Edge* e3 = new Edge(currentOut, &verticesIn[index * i + (j+1)]);
+				Edge* e4 = new Edge(&verticesIn[index * i + (j+1)], currentOut);
+ 
+				currentOut->addEdge(e3);
+				e4->increaseFlow();
+				e4->setReverse(e3);
+				verticesIn[index * i + (j+1)].addEdge(e4);
 			}
 
 			// bottom vertex
 			if(i < (rows - 1)) {
-				Edge* e = new Edge(currentOut, &verticesIn[index * (i+1) + j]);
-				currentOut->addEdge(e);
+				Edge* e3 = new Edge(currentOut, &verticesIn[index * (i+1) + j]);
+				Edge* e4 = new Edge(&verticesIn[index * (i+1) + j], currentOut);
+
+				currentOut->addEdge(e3);
+				e4->increaseFlow();
+				e4->setReverse(e3);
+				verticesIn[index * (i+1) + j].addEdge(e4);
 			}
 			
 			// left vertex 
 			if(j > 0) {
-				Edge* e = new Edge(currentOut, &verticesIn[index * i + (j-1)]);
-				e->setReverse(verticesOut[index * i + (j - 1)].getAdjacencies()[1]);
-				
-				currentOut->addEdge(e);
+				Edge* e3 = new Edge(currentOut, &verticesIn[index * i + (j-1)]);
+				Edge* e4 = new Edge(&verticesIn[index * i + (j-1)], currentOut);
+
+				currentOut->addEdge(e3);
+				e4->increaseFlow();
+				e4->setReverse(e3);
+				verticesIn[index * i + (j-1)].addEdge(e4);
 			}
 
 			// top vertex
 			if(i > 0) {
-				Edge* e = new Edge(currentOut, &verticesIn[index * (i-1) + j]);
-				e->setReverse(verticesOut[index * (i-1) + j].getAdjacencies()[2]);
+				Edge* e3 = new Edge(currentOut, &verticesIn[index * (i-1) + j]);
+				Edge* e4 = new Edge(&verticesIn[index * (i-1) + j], currentOut);
 
-				currentOut->addEdge(e);
+				currentOut->addEdge(e3);
+				e4->increaseFlow();
+				e4->setReverse(e3);
+				verticesIn[index * (i-1) + j].addEdge(e4);
 			}
 
 		}

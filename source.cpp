@@ -112,8 +112,9 @@ public:
 };
 
 bool DFS(Vertex *v) {
+  	v->setVisited(true);
+
 	if(v->getType() == SINK){	
-		v->setVisited(true);
 		return true;
 	}
 
@@ -167,6 +168,8 @@ int main() {
 
 	Vertex verticesIn[rows * cols];
 	Vertex verticesOut[rows * cols];
+	
+	
 
 	Vertex* sink = new Vertex();
 	sink->setType(SINK);
@@ -238,7 +241,7 @@ int main() {
 		e2->setReverse(e1);
 
 		sink->addEdge(e2);
-		currentIn->setType(SUPERMARKET);
+		currentOut->setType(SUPERMARKET);
 
 		supermarkets.push_back(currentIn); // MIGHT NOT BE NEEDED
 	}

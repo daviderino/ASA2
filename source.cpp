@@ -156,12 +156,7 @@ int main() {
 
 	int index;
 
-	if(rows > cols) {
-		index = rows;
-	}
-	else {
-		index = cols;
-	}
+	index = cols;
 
 	Vertex* source = new Vertex();
 	source->setType(SOURCE);
